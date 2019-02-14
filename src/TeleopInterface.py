@@ -4,22 +4,32 @@ import math
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 
-
+#Receives controller state information from the Joy Node and publishes a Twist message accordingly
 def ControllerCallback(controllerState):
     global notPaused
     global velocityPublisher
+    global notPausedToggleTime
 
+    #Check whether or not to "pause" control
     if controllerState.buttons[buttons["START"]]:
-        notPaused = notPaused ^ 1
+
+        #This is effectively button "debouncing" i.e. ensuring that the state change occurs only once per physical button press
+        duration = rospy.Time.now() - notPausedToggleTime
+        if duration.to_sec() >= 1:
+            notPaused = notPaused ^ 1
+            notPausedToggleTime = rospy.Time.now()
 
     msg = Twist()
-
+ 
+    #Determine the linear velocity to send
     x = -1.0 * (1.0 - controllerState.axes[axes["LT"]]) / 8.0
 
+    #Forward direction takes priority
     if controllerState.axes[axes["RT"]] != 1.0:
         x = (1.0 - controllerState.axes[axes["RT"]]) / 8.0
 
-    x *= notPaused
+    #notPaused = 0 will set all math to 0. This effectively "pauses" the robot
+    x *= notPaused 
     z = controllerState.axes[axes["LS_LEFT_RIGHT"]] * notPaused
 
     msg.linear.x = x
@@ -34,6 +44,7 @@ axes =     { "LS_LEFT_RIGHT" : 0, "LS_UP_DOWN" : 1, "LT" : 2, "RS_LEFT_RIGHT" : 
 
 velocityPublisher = 0
 notPaused = 0
+notPausedToggleTime = 0
 
 def main():
     global velocityPublisher
