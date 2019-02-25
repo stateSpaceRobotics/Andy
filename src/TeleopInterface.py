@@ -48,9 +48,11 @@ notPausedToggleTime = 0
 
 def main():
     global velocityPublisher
+    global notPausedToggleTime
     rospy.init_node('listener', anonymous = True)
     rospy.Subscriber("/joy1", Joy, ControllerCallback)
     velocityPublisher = rospy.Publisher('/andy/cmd_vel', Twist, queue_size=10)
+    notPausedToggleTime = rospy.Time.now()
 
     rospy.spin()
 

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Terminal=true
+Name=Andy Demo
+Icon=utilities-terminal
+Exec=gnome-terminal -e "bash -c '~/catkin_ws/src/andy/launch/launch.sh;$SHELL'"
+Categories=Application;
